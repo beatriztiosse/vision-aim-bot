@@ -1,4 +1,4 @@
-/*class to store circle info*/
+import MLController from './ml-controller.js'
 class Circle {
     constructor(x, y, rad, stepX, stepY, color) {
         this.isOn = true;
@@ -58,6 +58,18 @@ easyLevelBut.addEventListener('click', () => {
     minSpeed = -5;
     nbCircles = 7;
     level = 'easy';
+});
+
+const worker = new Worker('./detector.worker.js', { type: 'module' });
+
+const mlController = new MLController({
+    canvas,
+    worker,
+    level
+});
+
+worker.postMessage({
+    type: 'LOAD_MODEL'
 });
 
 function drawCircle(circle) {
@@ -205,6 +217,8 @@ function Render() {
     {
         animate(circles);
         window.requestAnimationFrame(Render);
+    } else {
+        mlController.stop();
     }
 }
 
@@ -218,6 +232,7 @@ function Play() {
         circles = generateCircles(nbCircles);
 
         window.requestAnimationFrame(Render);
+        mlController.start();
     }
     else {
         window.alert('Select Level First !');
